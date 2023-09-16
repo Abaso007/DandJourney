@@ -56,14 +56,22 @@ class BotCommandCls(Extension):
         ChannelSwitch(ctx)
         _insert = SystemQueue.insert_queue(DQueueID,{"User":ctx.author_id, "Channel":ctx.channel_id, "Mode":"UV"})
 
-        kwargs.update({"prompt": prompt, "no": no, "image": image, "QueueKey": _insert[0][1], "version": "4"})
+        kwargs |= {
+            "prompt": prompt,
+            "no": no,
+            "image": image,
+            "QueueKey": _insert[0][1],
+            "version": "4",
+        }
         _PromptMix = PromptMix(**kwargs)
         prompt = _PromptMix.DJPromptMix()
         if prompt[0]:
             _channel = BotSettings["BotOpt"]["AGENT_CHANNEL"] if BotSettings["BotOpt"]["AGENT_SIGN"] else ctx.channel.id
-            response = PostAgent.Imagine("<#{}> {}".format(_insert[0][1], prompt[1]), channel = _channel)
+            response = PostAgent.Imagine(
+                f"<#{_insert[0][1]}> {prompt[1]}", channel=_channel
+            )
             if response[0]:
-                await ctx.send("DandJourney接收参数:{}".format(prompt[1]))
+                await ctx.send(f"DandJourney接收参数:{prompt[1]}")
             else:
                 await ctx.send(response[1])
         else:
@@ -81,15 +89,29 @@ class BotCommandCls(Extension):
         ChannelSwitch(ctx)
         _insert = SystemQueue.insert_queue(DQueueID,{"User":ctx.author_id, "Channel":ctx.channel_id, "Mode":"UV"})
 
-        kwargs.update({"prompt": prompt, "area": area, "no": no, "quality": quality, "stylize": stylize, "niji": niji, 
-                       "seed": seed, "chaos": chaos, "image": image, "imageratio": imageratio, "QueueKey": _insert[0][1], "version": "5"})
+        kwargs |= {
+            "prompt": prompt,
+            "area": area,
+            "no": no,
+            "quality": quality,
+            "stylize": stylize,
+            "niji": niji,
+            "seed": seed,
+            "chaos": chaos,
+            "image": image,
+            "imageratio": imageratio,
+            "QueueKey": _insert[0][1],
+            "version": "5",
+        }
         _PromptMix = PromptMix(**kwargs)
         prompt = _PromptMix.DJPromptMix()
         if prompt[0]:
             _channel = BotSettings["BotOpt"]["AGENT_CHANNEL"] if BotSettings["BotOpt"]["AGENT_SIGN"] else ctx.channel.id
-            response = PostAgent.Imagine("<#{}> {}".format(_insert[0][1], prompt[1]), channel = _channel)
+            response = PostAgent.Imagine(
+                f"<#{_insert[0][1]}> {prompt[1]}", channel=_channel
+            )
             if response[0]:
-                await ctx.send("DandJourney接收参数:{}".format(prompt[1]))
+                await ctx.send(f"DandJourney接收参数:{prompt[1]}")
             else:
                 await ctx.send(response[1])
         else:
@@ -107,15 +129,30 @@ class BotCommandCls(Extension):
         ChannelSwitch(ctx)
         _insert = SystemQueue.insert_queue(DQueueID,{"User":ctx.author_id, "Channel":ctx.channel_id, "Mode":"UV"})
 
-        kwargs.update({"prompt": prompt, "area": area, "no": no, "quality": quality, "style": style, "stylize": stylize, "niji": niji, 
-                       "seed": seed, "chaos": chaos, "image": image, "imageratio": imageratio, "QueueKey": _insert[0][1], "version": "5.1"})
+        kwargs |= {
+            "prompt": prompt,
+            "area": area,
+            "no": no,
+            "quality": quality,
+            "style": style,
+            "stylize": stylize,
+            "niji": niji,
+            "seed": seed,
+            "chaos": chaos,
+            "image": image,
+            "imageratio": imageratio,
+            "QueueKey": _insert[0][1],
+            "version": "5.1",
+        }
         _PromptMix = PromptMix(**kwargs)
         prompt = _PromptMix.DJPromptMix()
         if prompt[0]:
             _channel = BotSettings["BotOpt"]["AGENT_CHANNEL"] if BotSettings["BotOpt"]["AGENT_SIGN"] else ctx.channel.id
-            response = PostAgent.Imagine("<#{}> {}".format(_insert[0][1], prompt[1]), channel = _channel)
+            response = PostAgent.Imagine(
+                f"<#{_insert[0][1]}> {prompt[1]}", channel=_channel
+            )
             if response[0]:
-                await ctx.send("DandJourney接收参数:{}".format(prompt[1]))
+                await ctx.send(f"DandJourney接收参数:{prompt[1]}")
             else:
                 await ctx.send(response[1])
         else:

@@ -27,7 +27,7 @@ class PromptMix:
     def BannedCheck(self):
         # 有黑名单关键词就会进行反馈操作
         if self.prompt and any((match := __banned) in self.prompt for __banned in BotSettings["BotParam"]["Banned_Word"]):
-            return (False, "Has Banned Word:{}".format(match))
+            return False, f"Has Banned Word:{match}"
 
     def PromptClear(self, _prompt, splitstr = "--"):
         """
@@ -42,8 +42,8 @@ class PromptMix:
         for _link in LinkPrompt:
             _prompt = _prompt.replace(_link, "")
             if _link.endswith(("jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "tiff", "ico")):
-                LinkStr += "{} ".format(_link)
-        
+                LinkStr += f"{_link} "
+
         # 清除内容中的niji
         _prompt = re.sub(r"--niji\s+\S*", "", _prompt)
         # 参数处理,返回参数与用户自己输入的一些设置值
@@ -63,27 +63,53 @@ class PromptMix:
 
         # 参数处理
         try:
-            ImageAdd = " {} ".format(self.image.url) if self.image and hasattr(self.image, 'url') and "http" in self.image.url else "" 
+            ImageAdd = (
+                f" {self.image.url} "
+                if self.image
+                and hasattr(self.image, 'url')
+                and "http" in self.image.url
+                else ""
+            )
             prompt =  ImageAdd + prompt
         except Exception as e:
-            return (False, "Error in PromptMix:{}".format(str(e)))
+            return False, f"Error in PromptMix:{str(e)}"
 
-        prompt += " --no {} ".format(self.no) if self.no else ""
-        prompt += " --iw {} ".format(round(((self.imageratio + 5) * 0.1), 1)) if (self.image or prompt.startswith("http")) and self.imageratio else ""
-        prompt += " --quality {} ".format(self.quality) if self.quality and 0.25 < float(self.quality) < 2.0 else ""
+        prompt += f" --no {self.no} " if self.no else ""
+        prompt += (
+            f" --iw {round((self.imageratio + 5) * 0.1, 1)} "
+            if (self.image or prompt.startswith("http")) and self.imageratio
+            else ""
+        )
+        prompt += (
+            f" --quality {self.quality} "
+            if self.quality and 0.25 < float(self.quality) < 2.0
+            else ""
+        )
 
         if self.area:
             if "：" in self.area: self.area = self.area.replace("：", ":")
             area_parts = self.area.split(":")
             if len(area_parts) == 2 and all(part.isdigit() for part in area_parts):
                 area_num = int(area_parts[0]) / int(area_parts[1])
-                prompt += " --ar {} ".format(self.area) if 0.5 < area_num < 2.0 and area_num != 1.0 else ""
+                prompt += (
+                    f" --ar {self.area} "
+                    if 0.5 < area_num < 2.0 and area_num != 1.0
+                    else ""
+                )
 
-        prompt += " --seed {} ".format(self.seed) if self.seed and 0 < self.seed < 4294967295 else ""
-        prompt += " --niji {} ".format(self.niji) if self.niji else ""
-        prompt += " --stylize {} ".format(self.stylize) if self.stylize and 0 < self.stylize < 1000 and self.niji != 4 else ""
-        prompt += " --chaos {} ".format(self.chaos) if self.chaos else ""
-        prompt += " --v {} ".format(self.version) if self.version else ""
+        prompt += (
+            f" --seed {self.seed} "
+            if self.seed and 0 < self.seed < 4294967295
+            else ""
+        )
+        prompt += f" --niji {self.niji} " if self.niji else ""
+        prompt += (
+            f" --stylize {self.stylize} "
+            if self.stylize and 0 < self.stylize < 1000 and self.niji != 4
+            else ""
+        )
+        prompt += f" --chaos {self.chaos} " if self.chaos else ""
+        prompt += f" --v {self.version} " if self.version else ""
         prompt += " --style raw " if self.style == False and self.version == "5.1" else ""
         prompt += UserOpt
 

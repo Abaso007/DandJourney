@@ -11,7 +11,7 @@ from .parameter import Banned_Word, DjPromptDic, DBlendPromptDic, DDescribePromp
 
 def ConfigCheck(Config):
     if bool(re.findall("^_Add.*HERE_$", Config)):
-        raise ValueError("初始变量{}未定义".format(Config))
+        raise ValueError(f"初始变量{Config}未定义")
     return Config
 
 

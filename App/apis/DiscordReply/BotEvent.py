@@ -44,8 +44,9 @@ class BotEventCls(Extension):
         if message.author.bot:
             try:
                 if message.author.username == "Midjourney Bot" and message.interaction.name == "describe":
-                    if message.id not in self.describeBox:
-
+                    if message.id in self.describeBox:
+                        self.describeBox.remove(message.id)
+                    else:
                         self.describeBox.append(message.id)
                         # 临时写法,只能用在Discord上面
                         # Describe的问题很大,传递的照片一旦出问题很容易堵塞队列,在按时间清除队列元素写法出来前不建议使用
@@ -55,11 +56,13 @@ class BotEventCls(Extension):
                         _emb = DescribeEmb(message.embeds[0].description, _DiscordQueue["Image"])
 
                         signalChannel = self.client.get_channel(int(_DiscordQueue["Channel"] if BotSettings["BotOpt"]["AGENT_SIGN"] else message.channel.id))
-                        await signalChannel.send(content = "<@{}>".format(_DiscordQueue["User"]), embeds = _emb, attachments=[])
+                        await signalChannel.send(
+                            content=f'<@{_DiscordQueue["User"]}>',
+                            embeds=_emb,
+                            attachments=[],
+                        )
                         SystemQueue.delete_queue_value(DQueueFQID, _DiscordQueue["JobID"])
                         print(SystemQueue.queueAllItem(length=True))
-                    else:
-                        self.describeBox.remove(message.id)
             except AttributeError as e:
                 pass
 
@@ -74,10 +77,10 @@ class BotEventCls(Extension):
             try:
             # 减少判断条件数量，其他归并做忽略处理 
             # 经测试无法删除MidJourney的原始消息，否则会404_No_Message，如果觉得重复生成比较烦，可以专门开一个区用来存放生成的内容
-            
+
             # 前置条件 取出队列的数据
                 Queue_msg = QueueParse(message.content, SystemQueue)
-            
+
             # 条件1：当消息为Midjourney发送，且能够获取相关的信息，则自动回复这条消息获得targetID 与 targetHash
 
             # update 1:这里有bug,暂时没办法通过消息去获得队列中按钮触发的队列信息(JobID不能通过按钮传递)
@@ -102,13 +105,11 @@ class BotEventCls(Extension):
                         await signalChannel.send(content = _user, components = self.UVComponent, embeds = _embed, attachments=[])
                     elif _mode == "MV" or ("BT" in _mode and int(_mode[2:]) < 4):
                         await signalChannel.send(content = _user, components = self.MakeVComponent, embeds = _embed, attachments=[])
-                    else:
-                        pass
                     SystemQueue.delete_queue_value(_msgJobID, _JobID)
                     await message.delete(delay=5)
                     print(SystemQueue.queueAllItem(length=True))
-            
-                
+
+
             except IndexError as e:
                 pass
 

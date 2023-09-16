@@ -25,7 +25,7 @@ class PromptGenerate:
         # 参数合规检验
         for needValue in ["name", "description", "type", "required"]:
             if needValue not in Prompt:
-                raise ValueError("PromptError: Prompt'{}' is required".format(needValue))
+                raise ValueError(f"PromptError: Prompt'{needValue}' is required")
 
         SlashOption = interactions.SlashCommandOption(
             name = Prompt["name"],
@@ -39,12 +39,12 @@ class PromptGenerate:
         if "max" in Prompt:
             if Prompt["type"] == "str":
                 SlashOption.max_length = Prompt["max"]
-            if Prompt["type"] == "int" or Prompt["type"] == "float":
+            if Prompt["type"] in ["int", "float"]:
                 SlashOption.max_value = Prompt["max"]
         if "min" in Prompt:
             if Prompt["type"] == "str":
                 SlashOption.min_length = Prompt["min"]
-            if Prompt["type"] == "int" or Prompt["type"] == "float":
+            if Prompt["type"] in ["int", "float"]:
                 SlashOption.min_value = Prompt["min"]
 
         return SlashOption

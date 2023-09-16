@@ -15,18 +15,23 @@ class PostMethod():
         self.MID_JOURNEY_ID = MID_JOURNEY_ID
         self.SERVER_ID = SERVER_ID
         self.CHANNEL_ID = CHANNEL_ID
-        
+
         self.header = {'authorization' : VIP_TOKEN}
         self.URL = "https://discord.com/api/v9/interactions"
 
-        self.StorageURL = "https://discord.com/api/v9/channels/" + CHANNEL_ID + "/attachments"
+        self.StorageURL = (
+            f"https://discord.com/api/v9/channels/{CHANNEL_ID}/attachments"
+        )
 
     def __ResponseCheck(self, Response):
         """
         验证请求状态，类内方法
         """
         if Response.status_code >= 400:
-            return (False, "ResponseError in Location:{}, Msg:{}, Code:{}".format("ResponseCheck" ,Response.text, Response.status_code))
+            return (
+                False,
+                f"ResponseError in Location:ResponseCheck, Msg:{Response.text}, Code:{Response.status_code}",
+            )
         return (True, Response)
 
     def GetResponse(self, json : dict) -> bool:
@@ -37,7 +42,7 @@ class PostMethod():
             response = requests.post(url = self.URL, json = json, headers = self.header)
             return self.__ResponseCheck(response)
         except Exception as e:
-            return (False, "ResponseError in Location:{}, Msg:{}".format("GetResponse", e))
+            return False, f"ResponseError in Location:GetResponse, Msg:{e}"
 
     def ImageStorage(self, ImageName : str, ImageUrl : str, ImageSize : int, prompt: str) -> tuple:
         """
@@ -46,28 +51,31 @@ class PostMethod():
         """
         try:
             ImageName = ImageName.split(".")
-            ImageName = "{}_{}.{}".format(ImageName[0], prompt, ImageName[1])
+            ImageName = f"{ImageName[0]}_{prompt}.{ImageName[1]}"
 
             _response = requests.post(url = self.StorageURL, json = JsonRegImg(ImageName, ImageSize), headers = self.header)
-            if self.__ResponseCheck(_response)[0]:
-                __Res = _response.json()["attachments"][0]
-                upload_url = __Res["upload_url"]
-                upload_filename = __Res["upload_filename"]
-
-                __response = requests.get(ImageUrl, headers={"authority":"cdn.discordapp.com"})
-                if self.__ResponseCheck(__response)[0]:
-
-                    ___response = requests.put(upload_url,data=__response.content, headers={"authority":"discord-attachments-uploads-prd.storage.googleapis.com"})
-                    if self.__ResponseCheck(___response)[0]:
-                        return (True, (ImageName, upload_filename))
-                    else:
-                        return (False, "StorageError in Location:ImageStorage, Msg:Can't Storage!")
-                else:
-                    return (False, "ReadError in Location:Image, Msg:Image is not exist!")
-            else:
+            if not self.__ResponseCheck(_response)[0]:
                 return (False, "ResponseError in Location:GetResponse, Msg:Fail to get Response from Discord!")
+            __Res = _response.json()["attachments"][0]
+            upload_url = __Res["upload_url"]
+            upload_filename = __Res["upload_filename"]
+
+            __response = requests.get(ImageUrl, headers={"authority":"cdn.discordapp.com"})
+            if self.__ResponseCheck(__response)[0]:
+
+                ___response = requests.put(upload_url,data=__response.content, headers={"authority":"discord-attachments-uploads-prd.storage.googleapis.com"})
+                return (
+                    (True, (ImageName, upload_filename))
+                    if self.__ResponseCheck(___response)[0]
+                    else (
+                        False,
+                        "StorageError in Location:ImageStorage, Msg:Can't Storage!",
+                    )
+                )
+            else:
+                return (False, "ReadError in Location:Image, Msg:Image is not exist!")
         except Exception as e:
-            return (False, "RunningError in Location:{}, Msg:{}".format("ImageStorage", e))
+            return False, f"RunningError in Location:ImageStorage, Msg:{e}"
 
     def RefreshChannel(self, ChannelID : str) -> None:
         """
@@ -85,8 +93,8 @@ class DecoratorCls:
     """
     def ChannelDC(self, func):
         def wrapper(innerSelf):
-            pass
             func(innerSelf)
+
         return wrapper
     
 
@@ -94,7 +102,6 @@ class DiscordPost(PostMethod):
     DecoCls = DecoratorCls()
     def __init__(self) -> None:
         PostMethod.__init__(self, BotSettings["BotCode"]["MID_JOURNEY_ID"], BotSettings["BotCode"]["SERVER_ID"], BotSettings["BotCode"]["CHANNEL_ID"], BotSettings["BotCode"]["VIP_TOKEN"])
-        pass
 
     def Imagine(self, prompt : str, channel : str = None) -> object:
         """
@@ -102,8 +109,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonImagine(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID, 
                                 prompt)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
 
     def Upscale(self, index : int, messageId : str, messageHash : str, channel : str = None):
         """
@@ -111,8 +117,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "upsample")
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
     
     def Variation(self, index : int, messageId : str, messageHash : str, solo : bool = False, channel : str = None):
         """
@@ -120,8 +125,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "variation", solo=solo)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
     
     def Remaster(self, index : int, messageId : str, messageHash : str, channel : str = None):
         """
@@ -129,8 +133,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "remaster", solo = True)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
 
     def LUpscale(self, index : int, messageId : str, messageHash : str, channel : str = None):
         """
@@ -138,8 +141,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "upsample_light", solo = True)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
 
     def DUpscale(self, index : int, messageId : str, messageHash : str, channel : str = None):
         """
@@ -147,8 +149,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "upsample", solo = True)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
     
     def BUpscale(self, index : int, messageId : str, messageHash : str, channel : str = None):
         """
@@ -156,24 +157,21 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "upsample_beta", solo = True)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
 
     def Fast(self):
         """
         切换出图模式为:Fast
         """
         __payload = JsonFast(self.MID_JOURNEY_ID, self.SERVER_ID, self.CHANNEL_ID)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
     
     def Relax(self):
         """
         切换出图模式为:Relax
         """
         __payload = JsonRelax(self.MID_JOURNEY_ID, self.SERVER_ID, self.CHANNEL_ID)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
 
     def Blend(self, ImageSet : list, Dimensions : str, prompt : str, channel : str = None):
         """
@@ -184,7 +182,13 @@ class DiscordPost(PostMethod):
             if Image:
                 response = self.ImageStorage(ImageName = Image.__getattribute__("filename"), ImageUrl = Image.__getattribute__("url"), ImageSize = Image.__getattribute__("size"), prompt = prompt)
                 if response[0]:
-                    __options.append({"type":11,"name":"image{}".format(len(__options)+1),"value":len(__options)})
+                    __options.append(
+                        {
+                            "type": 11,
+                            "name": f"image{len(__options) + 1}",
+                            "value": len(__options),
+                        }
+                    )
                     __attachments.append({"id":str(len(__options)-1),"filename":response[1][0],"uploaded_filename":response[1][1]})
 
         if Dimensions != "--ar 1:1":
@@ -201,8 +205,7 @@ class DiscordPost(PostMethod):
         """
         __payload = JsonMorph(self.MID_JOURNEY_ID, self.SERVER_ID, channel if channel else self.CHANNEL_ID,
                               index, messageId, messageHash, "reroll", solo=True)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
     
     def Describe(self, Image : object, prompt : str, channel : str = None):
         """
@@ -222,5 +225,4 @@ class DiscordPost(PostMethod):
         注册图片，用于外链图片上传
         """
         __payload = JsonRegImg(filename, filesize, url)
-        response = self.GetResponse(json = __payload)
-        return response
+        return self.GetResponse(json = __payload)
