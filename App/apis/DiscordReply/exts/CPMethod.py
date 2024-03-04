@@ -92,15 +92,15 @@ def ButtonClick(ctx: interactions.ComponentContext, styleNeed: int = 1, disable:
             button = Button(style = __component.style, custom_id = __component.custom_id, label = __component.label, disabled = __component.disabled)
             if Switch:
                 # 按钮状态切换
-                if __component.custom_id == BotSettings[Switch[0]][Switch[1]] or __component.custom_id == ctx.component.custom_id:
-                    button.style = __buttonList[1] if str(__component.style)=="1" else __buttonList[0] 
-                    button.disabled = False if __component.disabled else True
-            else:
-                # 按钮状态设置
-                if __component.custom_id == ctx.component.custom_id:
-                    button.style = __buttonList[styleNeed-1]
-                    button.disabled = disable
-                else: pass
+                if __component.custom_id in [
+                    BotSettings[Switch[0]][Switch[1]],
+                    ctx.component.custom_id,
+                ]:
+                    button.style = __buttonList[1] if str(__component.style)=="1" else __buttonList[0]
+                    button.disabled = not __component.disabled
+            elif __component.custom_id == ctx.component.custom_id:
+                button.style = __buttonList[styleNeed-1]
+                button.disabled = disable
             __SecList.append(button)
         __tempList.append(__SecList)
     return __tempList

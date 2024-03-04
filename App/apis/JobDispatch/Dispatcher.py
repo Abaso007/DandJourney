@@ -30,15 +30,14 @@ class QueueCls:
         获取队列未被引用的JobID
         """
         used_ids = [item['JobID'][10:] for item in self.queue]
-        _date = datetime.datetime.now().strftime("%m%d%H%M%S")
-        if len(used_ids) >= self.queue_size:pass
-        else:
+        if len(used_ids) < self.queue_size:
             if UpJob:return (True, UpJob)
+            _date = datetime.datetime.now().strftime("%m%d%H%M%S")
             for i in range(self.queue_size):
-                new_id = "{}{}{}".format(_date, self.queue_name, i)
+                new_id = f"{_date}{self.queue_name}{i}"
                 if new_id not in used_ids:
                     return (True, new_id)
-        return (False, "JobID has already reach limit:{}".format(self.queue_size))
+        return False, f"JobID has already reach limit:{self.queue_size}"
 
     def insert(self, element, otherKey, UpJob):
         """
@@ -69,28 +68,21 @@ class QueueCls:
         """
         队列验证
         """
-        if self.queue:
-            return (True, self.queue[0])
-        else:
-            return (False, "Queue is empty.")
+        return (True, self.queue[0]) if self.queue else (False, "Queue is empty.")
 
     def last(self, PutAll = False, length = False):
         """
         队列剩余内容输出
         """
         if PutAll:
-            return [item for item in self.queue]
-        if length:
-            return len(self.queue)
-        else:
-            return [item['JobID'] for item in self.queue]
+            return list(self.queue)
+        return len(self.queue) if length else [item['JobID'] for item in self.queue]
         
     def get_memory(self):
         """
         获得队列的空间占用
         """
-        total_memory = sum(sys.getsizeof(item) for item in self.queue)
-        return total_memory
+        return sum(sys.getsizeof(item) for item in self.queue)
 
 
 class Job:
@@ -130,7 +122,7 @@ class Job:
         """
         输出队列列表
         """
-        return [_queue for _queue in self.queues.keys()]
+        return list(self.queues.keys())
     
     def queueAllItem(self, PutAll = False, length = False):
         """
@@ -172,8 +164,7 @@ class Job:
         """
         if queue_id in self.queues:
             queue = self.queues[queue_id]
-            removed_elements = queue.remove(job_id)
-            return removed_elements
+            return queue.remove(job_id)
         else:
             print(f"Queue '{queue_id}' does not exist.")
             return []
@@ -183,5 +174,4 @@ class Job:
         查询队列管理器目前内存
         队列中若出现对象,此算法将失效
         """
-        total_memory = sum(queue.get_memory() for queue in self.queues.values())
-        return total_memory
+        return sum(queue.get_memory() for queue in self.queues.values())

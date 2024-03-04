@@ -8,7 +8,10 @@ def CreateMsg(message):
     msg = re.sub(r"<.*?>|\*", "", message.get_referenced_message().content)
     targetID = str(message.message_reference.message_id)
     targetHash = str((message.get_referenced_message().attachments[0].url.split("_")[-1]).split(".")[0])
-    return "**{}的控制板**\n关键词：{}\nID：{}\nHash：{}\n生成图片：{}".format(user, msg, targetID, targetHash, result), result
+    return (
+        f"**{user}的控制板**\n关键词：{msg}\nID：{targetID}\nHash：{targetHash}\n生成图片：{result}",
+        result,
+    )
 
 
 def CreateAgency(message, _Queue, msgID):

@@ -25,7 +25,9 @@ PROXY_AUTH = VenvValue.get('PROXY_AUTH') if "PROXY_AUTH" in VenvValue else None
 
 #boolean 格式
 # 这个已经彻底没用了 需要设置的话请在discord上面设置
-USE_MESSAGED_CHANNEL = True if "CHANNEL_SIGN" in VenvValue and VenvValue.get('CHANNEL_SIGN') == "True" else False 
+USE_MESSAGED_CHANNEL = (
+    "CHANNEL_SIGN" in VenvValue and VenvValue.get('CHANNEL_SIGN') == "True"
+) 
 
 #list 格式
 
